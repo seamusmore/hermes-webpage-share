@@ -27,32 +27,6 @@ trigger:
 
 ---
 
-## 隐私检查（发布前必做）
-
-技能代码和文档中容易意外泄露真实 ID、密钥或姓名。推送前执行以下检查：
-
-```bash
-cd E:/home/admin/hermes/skills/webpage-share
-
-# 检查是否有真实飞书 open_id
-grep -rn "ou_[a-f0-9]\{32\}" references/ scripts/ SKILL.md
-
-# 检查是否有真实 API key
-grep -rni "sk_ou_[a-f0-9]" references/ scripts/ SKILL.md
-
-# 检查文档示例中是否用了真实值（应全部是 xxx 占位符）
-grep -rni "ou_[a-f0-9]" references/ | grep -v "ou_xxx"
-```
-
-如果发现真实值，替换为占位符后再推送。
-
-## 铁律
-
-- **只做用户要求的事**：不擅自删除文件、修改无关引用、或"顺手清理"用户没提的内容。用户说删什么才删什么。
-- **示例必须用占位符**：所有文档中的文件名、ID、路径、链接必须用 `xxx`、`example.html` 等占位符，禁止使用真实项目名称或用户真实数据。
-
----
-
 ## 配置
 
 ### 1. 获取租户配置
