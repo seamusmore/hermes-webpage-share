@@ -14,7 +14,6 @@ trigger:
 ## 定位
 
 **webpage-share 是 HTML 分享助手**，当用户想要分享 HTML 文件时，执行脚本上传文件并返回分享链接。
-**webpage-share 是 HTML 分享助手**，当用户想要分享 HTML 文件时，执行脚本上传文件并返回分享链接。
 
 ---
 
@@ -34,7 +33,7 @@ trigger:
 技能代码和文档中容易意外泄露真实 ID、密钥或姓名。推送前执行以下检查：
 
 ```bash
-cd ~/.hermes/skills/openclaw-imports/webpage-share
+cd E:/home/admin/hermes/skills/webpage-share
 
 # 检查是否有真实飞书 open_id
 grep -rn "ou_[a-f0-9]\{32\}" references/ scripts/ SKILL.md
@@ -47,6 +46,11 @@ grep -rni "ou_[a-f0-9]" references/ | grep -v "ou_xxx"
 ```
 
 如果发现真实值，替换为占位符后再推送。
+
+## 铁律
+
+- **只做用户要求的事**：不擅自删除文件、修改无关引用、或"顺手清理"用户没提的内容。用户说删什么才删什么。
+- **示例必须用占位符**：所有文档中的文件名、ID、路径、链接必须用 `xxx`、`example.html` 等占位符，禁止使用真实项目名称或用户真实数据。
 
 ---
 
@@ -130,7 +134,7 @@ AI 回复：
 
 ### 场景 4：查看配置
 
-```
+```bash
 用户：网页分享的配置是什么？
 
 AI 行动：
@@ -140,17 +144,17 @@ python3 ~/.hermes/skills/webpage-share/scripts/webpage_share.py config
 ### 场景 5：下载已分享的页面
 
 ```
-用户：把那个页面下回来 / 下载「蛇蛇宇宙.html」
+用户：把那个页面下回来 / 下载「xxx.html」
 
 AI 行动：
-python3 ~/.hermes/skills/webpage-share/scripts/webpage_share.py download 蛇蛇宇宙.html
+python3 ~/.hermes/skills/webpage-share/scripts/webpage_share.py download example.html
 
 # 指定保存路径
-python3 ~/.hermes/skills/webpage-share/scripts/webpage_share.py download 蛇蛇宇宙.html /tmp/sheshe_universe.html
+python3 ~/.hermes/skills/webpage-share/scripts/webpage_share.py download example.html /tmp/example.html
 ```
 
 AI 回复：
-[OK] 已下载: 蛇蛇宇宙.html
+[OK] 已下载: example.html
      大小: 9593 bytes
      保存至: C:\Users\xiehong\...
 ```
@@ -255,7 +259,6 @@ curl -X GET "${PUBLIC_SERVICE_URL}/api/download?filename=report.html" \
 ## 参考资料
 
 - 后端 API 详情见 `references/backend-api.md`
-- 从飞书文档+Base 同步更新报告见 `references/feishu-report-sync.md`
 
 ---
 
