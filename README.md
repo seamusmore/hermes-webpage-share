@@ -63,6 +63,16 @@ python3 ~/.hermes/skills/webpage-share/scripts/webpage_share.py list
 python3 ~/.hermes/skills/webpage-share/scripts/webpage_share.py config
 ```
 
+### 下载已分享的页面
+
+```bash
+# 保存到当前目录，文件名与远程一致
+python3 ~/.hermes/skills/webpage-share/scripts/webpage_share.py download example.html
+
+# 指定保存路径
+python3 ~/.hermes/skills/webpage-share/scripts/webpage_share.py download example.html /tmp/example.html
+```
+
 ## 文件结构
 
 ```
