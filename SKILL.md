@@ -14,17 +14,18 @@ trigger:
 ## 定位
 
 **webpage-share 是 HTML 分享助手**，当用户想要分享 HTML 文件时，执行脚本上传文件并返回分享链接。
+**webpage-share 是 HTML 分享助手**，当用户想要分享 HTML 文件时，执行脚本上传文件并返回分享链接。
 
 ---
 
 ## 触发条件
-
 当用户说以下关键词时触发：
 - "分享这个 HTML"
 - "把这个网页分享"
 - "生成一个可分享的链接"
 - "上传 HTML 到网页服务"
 - "分享这个网页"
+- **"更新报告"/"更新页面内容"（从飞书文档+Base同步）→ 本 skill 的 references/feishu-report-sync.md 描述了完整流程**
 
 ---
 
@@ -136,9 +137,23 @@ AI 行动：
 python3 ~/.hermes/skills/webpage-share/scripts/webpage_share.py config
 ```
 
----
+### 场景 5：下载已分享的页面
 
-## 脚本命令
+```
+用户：把那个页面下回来 / 下载「蛇蛇宇宙.html」
+
+AI 行动：
+python3 ~/.hermes/skills/webpage-share/scripts/webpage_share.py download 蛇蛇宇宙.html
+
+# 指定保存路径
+python3 ~/.hermes/skills/webpage-share/scripts/webpage_share.py download 蛇蛇宇宙.html /tmp/sheshe_universe.html
+```
+
+AI 回复：
+[OK] 已下载: 蛇蛇宇宙.html
+     大小: 9593 bytes
+     保存至: C:\Users\xiehong\...
+```
 
 ### upload
 
@@ -147,7 +162,7 @@ python3 scripts/webpage_share.py upload <file_path>
 ```
 
 - 上传 HTML 文件到网页分享服务
-- 返回 JSON：`{success, filename, url}`
+- 返回：`[OK] 上传成功` + 分享链接
 
 ### list
 
@@ -156,7 +171,7 @@ python3 scripts/webpage_share.py list
 ```
 
 - 列出已分享的页面
-- 返回 JSON：`{success, pages: [{filename, url, size}]}`
+- 返回：`{success, pages: [{filename, url, size}]}`
 
 ### config
 
@@ -165,6 +180,16 @@ python3 scripts/webpage_share.py config
 ```
 
 - 显示当前配置（API Key 脱敏）
+
+### download
+
+```bash
+python3 scripts/webpage_share.py download <filename> [output_path]
+```
+
+- 下载已分享的页面
+- 不传 `output_path` 则保存到当前目录，文件名与远程一致
+- 返回：`[OK] 已下载` + 大小 + 保存路径
 
 ---
 
@@ -218,14 +243,22 @@ curl -X GET "${PUBLIC_SERVICE_URL}/api/list" \
   -H "X-API-Key: ${API_KEY}"
 ```
 
+**下载文件**：
+```bash
+curl -X GET "${PUBLIC_SERVICE_URL}/api/download?filename=report.html" \
+  -H "X-API-Key: ${API_KEY}" \
+  -o report.html
+```
+
 ---
 
 ## 参考资料
 
 - 后端 API 详情见 `references/backend-api.md`
+- 从飞书文档+Base 同步更新报告见 `references/feishu-report-sync.md`
 
 ---
 
-**版本**: 2.0.0
+**版本**: 2.1.0
 **创建日期**: 2026-04-08
 **维护者**: 蛇蛇

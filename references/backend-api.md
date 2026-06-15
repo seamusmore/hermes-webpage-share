@@ -49,6 +49,15 @@
 }
 ```
 
+### GET /api/download
+
+**认证**：`X-API-Key: {api_key}` 头
+
+**Query 参数**：
+- `filename`: 要下载的文件名（例如 `report.html`）
+
+**响应**：直接返回 HTML 文件内容（`text/html`）
+
 ## 服务管理
 
 ```bash

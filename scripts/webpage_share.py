@@ -6,6 +6,7 @@ Webpage Share 工具 - 将 HTML 文件上传到网页分享服务，生成可分
     python3 webpage_share.py upload /path/to/file.html
     python3 webpage_share.py list
     python3 webpage_share.py config
+    python3 webpage_share.py download <filename> [output_path]
 """
 
 import argparse
@@ -156,6 +157,30 @@ def cmd_config():
     print(f"- API Key: {masked_key}")
 
 
+def cmd_download(filename, output_path=None):
+    config = get_config()
+    download_url = f"{config['url']}/api/download?filename={filename}"
+    headers = {"X-API-Key": config["api_key"]}
+
+    try:
+        resp = requests.get(download_url, headers=headers, timeout=30)
+        resp.raise_for_status()
+    except requests.RequestException as e:
+        print(f"[ERR] 下载失败: {e}")
+        sys.exit(1)
+
+    save_path = Path(output_path) if output_path else Path(filename)
+    try:
+        save_path.write_bytes(resp.content)
+    except OSError as e:
+        print(f"[ERR] 保存文件失败: {e}")
+        sys.exit(1)
+
+    print(f"[OK] 已下载: {save_path}")
+    print(f"     大小: {len(resp.content)} bytes")
+    print(f"     保存至: {save_path.resolve()}")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Webpage Share - 上传 HTML 到网页分享服务"
@@ -165,6 +190,10 @@ def main():
     p_upload = sub.add_parser("upload", help="上传 HTML 文件")
     p_upload.add_argument("file_path", help="HTML 文件路径")
 
+    p_download = sub.add_parser("download", help="下载已分享的页面")
+    p_download.add_argument("filename", help="要下载的文件名")
+    p_download.add_argument("output_path", nargs="?", default=None, help="保存路径（默认当前目录同名文件）")
+
     sub.add_parser("list", help="列出已分享的页面")
     sub.add_parser("config", help="查看配置")
 
@@ -172,6 +201,8 @@ def main():
 
     if args.command == "upload":
         cmd_upload(args.file_path)
+    elif args.command == "download":
+        cmd_download(args.filename, args.output_path)
     elif args.command == "list":
         cmd_list()
     elif args.command == "config":
