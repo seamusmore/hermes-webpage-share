@@ -24,7 +24,6 @@ trigger:
 - "生成一个可分享的链接"
 - "上传 HTML 到网页服务"
 - "分享这个网页"
-- **"更新报告"/"更新页面内容"（从飞书文档+Base同步）→ 本 skill 的 references/feishu-report-sync.md 描述了完整流程**
 
 ---
 
