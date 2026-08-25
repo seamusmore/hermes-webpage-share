@@ -8,6 +8,7 @@ Hermes 技能 — 将 HTML 文件上传到网页分享服务，生成可分享�
 
 - **后端服务仓库**：https://github.com/seamusmore/webpage-share-service
 - 请先部署并启动后端服务，获取服务地址后再配置本技能。
+- 如果已经部署过后端服务，请直接看插件安装与配置。
 
 ## 安装
 
