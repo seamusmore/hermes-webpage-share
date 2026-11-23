@@ -17,6 +17,8 @@ trigger:
 
 ---
 
+技能根目录是本 SKILL.md 所在目录。在 Codex 或 Hermes 中，从该目录解析 `scripts/webpage_share.py` 的绝对路径。下文命令的相对路径均以技能根目录为基准；Windows 可用 `python` 代替 `python3`。
+
 ## 触发条件
 当用户说以下关键词时触发：
 - "分享这个 HTML"
@@ -39,14 +41,10 @@ trigger:
 ### 2. 填写 .env
 
 ```bash
-# 1. 复制示例到当前 profile 的 .env
-cp ~/.hermes/skills/webpage-share/.env.example \
-   ~/.hermes/.env   # 或 ~/.hermes/profiles/<profile>/.env
-
-# 2. 编辑 profile 的 .env，填入自己的租户配置
+# 在 Codex 进程环境或 Hermes profile 的 .env 中添加以下配置项
 WEBPAGE_SHARE_URL=https://your-domain.com
-WEBPAGE_SHARE_TENANT_ID=ou_xxx        # 你的飞书 open_id
-WEBPAGE_SHARE_API_KEY=sk_ou_xxx_xxx   # 登录后自动生成的 key
+WEBPAGE_SHARE_TENANT_ID=ou_xxx
+WEBPAGE_SHARE_API_KEY=sk_ou_xxx_xxx
 ```
 
 脚本读取优先级：环境变量 → profile 的 `.env`。URL、tenant_id、api_key 均不允许默认值，未配置时报错退出。
@@ -66,7 +64,7 @@ AI 思考：
 3. 返回分享链接
 
 AI 行动：
-python3 ~/.hermes/skills/webpage-share/scripts/webpage_share.py upload /home/admin/report.html
+python3 scripts/webpage_share.py upload /home/admin/report.html
 
 AI 回复：
 [OK] 已上传：report.html
@@ -81,7 +79,7 @@ AI 回复：
 用户：把刚才生成的原型分享出去
 
 AI 行动：
-python3 ~/.hermes/skills/webpage-share/scripts/webpage_share.py upload /path/to/generated.html
+python3 scripts/webpage_share.py upload /path/to/generated.html
 
 AI 回复：
 [OK] 已生成分享链接：
@@ -94,7 +92,7 @@ https://your-domain.com/ou_xxx/pages/xxx-prototype.html
 用户：我分享了哪些网页？
 
 AI 行动：
-python3 ~/.hermes/skills/webpage-share/scripts/webpage_share.py list
+python3 scripts/webpage_share.py list
 
 AI 回复：
 页面列表：
@@ -111,7 +109,7 @@ AI 回复：
 用户：网页分享的配置是什么？
 
 AI 行动：
-python3 ~/.hermes/skills/webpage-share/scripts/webpage_share.py config
+python3 scripts/webpage_share.py config
 ```
 
 ### 场景 5：下载已分享的页面
@@ -120,10 +118,10 @@ python3 ~/.hermes/skills/webpage-share/scripts/webpage_share.py config
 用户：把那个页面下回来 / 下载「xxx.html」
 
 AI 行动：
-python3 ~/.hermes/skills/webpage-share/scripts/webpage_share.py download example.html
+python3 scripts/webpage_share.py download example.html
 
 # 指定保存路径
-python3 ~/.hermes/skills/webpage-share/scripts/webpage_share.py download example.html /tmp/example.html
+python3 scripts/webpage_share.py download example.html /tmp/example.html
 ```
 
 AI 回复：

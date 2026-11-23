@@ -1,21 +1,6 @@
 # Webpage Share
 
-Hermes 技能和 Codex 插件，共用同一个客户端将 HTML 上传到网页分享服务。客户端需要 Python 3 和 requests。
-
-## 在 Codex 中使用
-
-已添加 Seamus Plugins 市场的用户，刷新后即可安装：
-
-```shell
-codex plugin marketplace upgrade seamusmore
-codex plugin add webpage-share@seamusmore
-```
-
-首次添加市场使用 `codex plugin marketplace add seamusmore/agent-plugins --ref main`。在新会话中说“把这份 HTML 分享出来”即可调用。将下文三个配置项放入 Codex 用户目录的 `webpage-share.env`（CODEX_HOME，默认 ~/.codex），或设置为进程环境变量。复用已有 Hermes 配置时，可显式指定文件：
-
-```shell
-python scripts/webpage_share.py --profile codex --env-file "/path/to/hermes/.env" upload report.html
-```
+适用于 Codex 和 Hermes 的独立 skill — 将 HTML 文件上传到网页分享服务，生成可分享的链接。
 
 ## 前置依赖
 
@@ -23,7 +8,33 @@ python scripts/webpage_share.py --profile codex --env-file "/path/to/hermes/.env
 
 - **后端服务仓库**：https://github.com/seamusmore/webpage-share-service
 - 请先部署并启动后端服务，获取服务地址后再配置本技能。
-- 如果已经部署过后端服务，请直接看插件安装与配置。
+- 如果已经部署过后端服务，请直接阅读对应的技能安装与配置步骤。
+
+## 在 Codex 中安装
+
+将本仓库克隆到个人技能目录。仓库根目录包含 `SKILL.md`，Codex 会从这里发现技能。客户端需要 Python 3 和 requests。
+
+**Windows PowerShell**
+
+```powershell
+git clone https://github.com/seamusmore/hermes-webpage-share.git "$HOME/.agents/skills/webpage-share"
+python -m pip install requests
+```
+
+**macOS / Linux**
+
+```sh
+git clone https://github.com/seamusmore/hermes-webpage-share.git "$HOME/.agents/skills/webpage-share"
+python3 -m pip install requests
+```
+
+按下方“配置”一节设置 `WEBPAGE_SHARE_URL`、`WEBPAGE_SHARE_TENANT_ID`、`WEBPAGE_SHARE_API_KEY` 三个环境变量，并确保启动 Codex 的进程可以读取它们。已有 Hermes 配置的机器也可直接复用 `HERMES_HOME/.env`（默认 `~/.hermes/.env`）。技能目录只存放代码和使用说明。
+
+打开新的 Codex 会话，输入“用 webpage-share 分享这份 HTML”，并附上本地文件路径。要先验证配置，可在 PowerShell 中运行：
+
+```powershell
+python "$HOME/.agents/skills/webpage-share/scripts/webpage_share.py" config
+```
 
 ## 在 Hermes 中安装
 
@@ -32,12 +43,7 @@ python scripts/webpage_share.py --profile codex --env-file "/path/to/hermes/.env
 git clone https://github.com/seamusmore/hermes-webpage-share.git \
   ~/.hermes/skills/webpage-share
 
-# 2. 复制配置示例到当前 profile 的 .env
-cp ~/.hermes/skills/webpage-share/.env.example \
-   ~/.hermes/.env
-# 或 ~/.hermes/profiles/<profile>/.env
-
-# 3. 编辑 .env 填入你自己的配置
+# 2. 参照 .env.example，在当前 profile 的 .env 中添加下方三个配置项
 ```
 
 ## 配置
@@ -53,8 +59,8 @@ cp ~/.hermes/skills/webpage-share/.env.example \
 
 ```bash
 WEBPAGE_SHARE_URL=https://your-domain.com
-WEBPAGE_SHARE_TENANT_ID=ou_xxx        # 你的飞书 open_id
-WEBPAGE_SHARE_API_KEY=sk_ou_xxx       # 登录后自动生成的 key
+WEBPAGE_SHARE_TENANT_ID=ou_xxx
+WEBPAGE_SHARE_API_KEY=sk_ou_xxx
 ```
 
 脚本读取优先级：**环境变量 → profile 的 `.env`**。URL、tenant_id、api_key 均不允许默认值，未配置时报错退出。
@@ -97,7 +103,7 @@ python3 ~/.hermes/skills/webpage-share/scripts/webpage_share.py download example
 ├── .gitignore            # Git 忽略规则
 ├── LICENSE               # 许可证
 ├── README.md             # 本文件
-├── SKILL.md              # Hermes 技能定义
+├── SKILL.md              # Codex 和 Hermes 共用的技能定义
 ├── references/
 │   └── backend-api.md    # 后端 API 参考文档
 └── scripts/
