@@ -1,6 +1,21 @@
 # Webpage Share
 
-Hermes 技能 — 将 HTML 文件上传到网页分享服务，生成可分享的链接。
+Hermes 技能和 Codex 插件，共用同一个客户端将 HTML 上传到网页分享服务。客户端需要 Python 3 和 requests。
+
+## 在 Codex 中使用
+
+已添加 Seamus Plugins 市场的用户，刷新后即可安装：
+
+```shell
+codex plugin marketplace upgrade seamusmore
+codex plugin add webpage-share@seamusmore
+```
+
+首次添加市场使用 `codex plugin marketplace add seamusmore/agent-plugins --ref main`。在新会话中说“把这份 HTML 分享出来”即可调用。将下文三个配置项放入 Codex 用户目录的 `webpage-share.env`（CODEX_HOME，默认 ~/.codex），或设置为进程环境变量。复用已有 Hermes 配置时，可显式指定文件：
+
+```shell
+python scripts/webpage_share.py --profile codex --env-file "/path/to/hermes/.env" upload report.html
+```
 
 ## 前置依赖
 
@@ -10,7 +25,7 @@ Hermes 技能 — 将 HTML 文件上传到网页分享服务，生成可分享�
 - 请先部署并启动后端服务，获取服务地址后再配置本技能。
 - 如果已经部署过后端服务，请直接看插件安装与配置。
 
-## 安装
+## 在 Hermes 中安装
 
 ```bash
 # 1. 克隆技能仓库
