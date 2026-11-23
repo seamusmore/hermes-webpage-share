@@ -18,12 +18,7 @@ from pathlib import Path
 import requests
 
 
-def config_path(profile, env_file):
-    if env_file:
-        return Path(env_file).expanduser()
-    if profile == "codex":
-        return Path(os.environ.get("CODEX_HOME") or Path.home() / ".codex") / "webpage-share.env"
-    return Path(os.environ.get("HERMES_HOME") or Path.home() / ".hermes") / ".env"
+DEFAULT_URL = ""
 
 
 def _read_env_file(path):
@@ -31,7 +26,7 @@ def _read_env_file(path):
     env = {}
     if not path.exists():
         return env
-    with open(path, "r", encoding="utf-8-sig") as f:
+    with open(path, "r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if line and not line.startswith("#") and "=" in line:
@@ -41,12 +36,13 @@ def _read_env_file(path):
     return env
 
 
-def load_env(profile_env):
+def load_env():
     """
     安全读取配置：
     - URL 、tenant_id 和 api_key 均从 profile 的 .env 或环境变量读取
     - 不允许硬编码默认值
     """
+    profile_env = Path(os.environ.get("HERMES_HOME", Path.home() / ".hermes")) / ".env"
     profile_cfg = _read_env_file(profile_env)
 
     # 所有配置均从环境变量或 profile .env 读取，不允许默认值
@@ -57,22 +53,41 @@ def load_env(profile_env):
     return {"url": url.rstrip("/"), "tenant_id": tenant, "api_key": key}
 
 
-def get_config(path):
-    cfg = load_env(path)
-    missing = [name for name, value in cfg.items() if not value]
-    if missing:
-        sys.exit(f"[ERR] {path} 或环境变量缺少配置: {', '.join(missing)}")
-    return cfg
+def get_config():
+    """获取配置，未配置时报错退出。"""
+    cfg = load_env()
+    url = cfg["url"]
+    tenant = cfg["tenant_id"]
+    key = cfg["api_key"]
+
+    if not url:
+        print("[ERR] 服务地址未配置。")
+        print("\n请在当前 profile 的 .env 文件中添加以下配置：")
+        print(f"  文件路径: {os.environ.get('HERMES_HOME', '~/.hermes')}/.env")
+        print()
+        print("  WEBPAGE_SHARE_URL=https://your-domain.com")
+        sys.exit(1)
+
+    if not tenant or not key:
+        print("[ERR] 配置不完整。")
+        print("\n请在当前 profile 的 .env 文件中添加以下配置：")
+        print(f"  文件路径: {os.environ.get('HERMES_HOME', '~/.hermes')}/.env")
+        print()
+        print("  WEBPAGE_SHARE_TENANT_ID=ou_xxx")
+        print("  WEBPAGE_SHARE_API_KEY=sk_ou_xxx")
+        print()
+        print("获取方法: 访问管理页面飞书登录后自动获取")
+        sys.exit(1)
+
+    return {"url": url, "tenant_id": tenant, "api_key": key}
 
 
-def cmd_upload(file_path, config):
+def cmd_upload(file_path):
+    config = get_config()
     path = Path(file_path)
     if not path.exists():
         print(f"[ERR] 文件不存在: {file_path}")
         sys.exit(1)
-
-    if not path.is_file() or path.suffix.lower() not in (".html", ".htm"):
-        sys.exit("[ERR] 请选择 HTML 文件。")
 
     upload_url = f"{config['url']}/api/upload"
     headers = {"X-API-Key": config["api_key"]}
@@ -90,7 +105,7 @@ def cmd_upload(file_path, config):
         print(f"[ERR] 服务器返回无效 JSON: {resp.text[:200]}")
         sys.exit(1)
 
-    if data.get("success") and data.get("url"):
+    if data.get("success"):
         print(f"[OK] 上传成功：{data.get('filename', path.name)}")
         url = data.get('url', '')
         if url:
@@ -101,7 +116,8 @@ def cmd_upload(file_path, config):
         sys.exit(1)
 
 
-def cmd_list(config):
+def cmd_list():
+    config = get_config()
     list_url = f"{config['url']}/api/list?tenant={config['tenant_id']}"
     headers = {"X-API-Key": config["api_key"]}
 
@@ -132,20 +148,22 @@ def cmd_list(config):
         print(f"  {p.get('url', '')}")
 
 
-def cmd_config(config):
-    masked_key = "***"
+def cmd_config():
+    config = get_config()
+    masked_key = config["api_key"][:8] + "***" if len(config["api_key"]) > 8 else "***"
     print(f"配置信息：\n")
     print(f"- 公共服务：{config['url']}")
     print(f"- 租户 ID: {config['tenant_id']}")
     print(f"- API Key: {masked_key}")
 
 
-def cmd_download(filename, output_path, config):
-    download_url = f"{config['url']}/api/download"
+def cmd_download(filename, output_path=None):
+    config = get_config()
+    download_url = f"{config['url']}/api/download?filename={filename}"
     headers = {"X-API-Key": config["api_key"]}
 
     try:
-        resp = requests.get(download_url, params={"filename": filename}, headers=headers, timeout=30)
+        resp = requests.get(download_url, headers=headers, timeout=30)
         resp.raise_for_status()
     except requests.RequestException as e:
         print(f"[ERR] 下载失败: {e}")
@@ -167,8 +185,6 @@ def main():
     parser = argparse.ArgumentParser(
         description="Webpage Share - 上传 HTML 到网页分享服务"
     )
-    parser.add_argument("--profile", choices=("hermes", "codex"), default="hermes", help="选择配置目录")
-    parser.add_argument("--env-file", help="显式指定分享服务配置文件")
     sub = parser.add_subparsers(dest="command")
 
     p_upload = sub.add_parser("upload", help="上传 HTML 文件")
@@ -183,19 +199,17 @@ def main():
 
     args = parser.parse_args()
 
-    if not args.command:
+    if args.command == "upload":
+        cmd_upload(args.file_path)
+    elif args.command == "download":
+        cmd_download(args.filename, args.output_path)
+    elif args.command == "list":
+        cmd_list()
+    elif args.command == "config":
+        cmd_config()
+    else:
         parser.print_help()
         sys.exit(1)
-
-    config = get_config(config_path(args.profile, args.env_file))
-    if args.command == "upload":
-        cmd_upload(args.file_path, config)
-    elif args.command == "download":
-        cmd_download(args.filename, args.output_path, config)
-    elif args.command == "list":
-        cmd_list(config)
-    elif args.command == "config":
-        cmd_config(config)
 
 
 if __name__ == "__main__":
